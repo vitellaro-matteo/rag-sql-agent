@@ -1,0 +1,72 @@
+# rag-sql-agent/config/settings.yaml
+# Central configuration — override any value via environment variables.
+
+llm:
+  provider: ${LLM_PROVIDER:-ollama}
+  model: ${LLM_MODEL:-llama3.1:8b}
+  temperature: 0.0
+  max_tokens: 2048
+  request_timeout: 120
+
+embedding:
+  model: ${EMBEDDING_MODEL:-all-MiniLM-L6-v2}
+  dimension: 384
+
+database:
+  path: ${DATABASE_PATH:-data/fintech.db}
+  read_only: true
+  max_rows_returned: 500
+  query_timeout_seconds: 30
+
+faiss:
+  index_path: ${FAISS_INDEX_PATH:-data/schema.faiss}
+  metadata_path: ${FAISS_METADATA_PATH:-data/schema_meta.pkl}
+  top_k: 5
+
+access_control:
+  roles:
+    admin:
+      allowed_tables: ["*"]
+      max_rows: 10000
+      can_write: true
+    analyst:
+      allowed_tables:
+        - transactions
+        - accounts
+        - merchants
+      denied_tables:
+        - users
+      max_rows: 1000
+      can_write: false
+    viewer:
+      allowed_tables:
+        - transactions
+        - merchants
+      denied_tables:
+        - users
+        - accounts
+      max_rows: 200
+      can_write: false
+
+validation:
+  blocked_keywords:
+    - "DROP"
+    - "DELETE"
+    - "TRUNCATE"
+    - "ALTER"
+    - "INSERT"
+    - "UPDATE"
+    - "CREATE"
+    - "GRANT"
+    - "REVOKE"
+  max_joins: 4
+  max_subqueries: 3
+  warn_full_scan_threshold: 10000
+
+orchestrator:
+  max_retries: 2
+  parallel_timeout: 30
+
+logging:
+  level: ${LOG_LEVEL:-INFO}
+  format: ${LOG_FORMAT:-json}
