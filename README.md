@@ -49,7 +49,7 @@ graph TD
 |---|---|---|
 | **QueryRouterAgent** | Classifies intent (sql_query, schema_info, greeting, out_of_scope) and complexity | Yes |
 | **SchemaRAGAgent** | Retrieves relevant schema chunks via FAISS, synthesizes context | Yes |
-| **AccessControlLayer** | Enforces role-based table permissions — deterministic, no hallucination risk | **No** |
+| **AccessControlLayer** | Enforces role-based table permissions, deterministic, no hallucination risk | **No** |
 | **SQLGeneratorAgent** | Generates SQLite SQL with visible chain-of-thought (understand → plan → construct → verify) | Yes |
 | **ValidationAgent** | Two-pass audit: deterministic rules (blocked keywords, injection patterns, join limits) + LLM semantic check | Hybrid |
 | **ExplainerAgent** | Translates query results into plain-English summaries with highlights | Yes |
@@ -66,7 +66,7 @@ A single "paste the schema + user question → get SQL" prompt works in demos. I
 
 3. **Schema doesn't fit.** With 50+ tables, stuffing full DDL into context wastes tokens and confuses the model. RAG retrieval over chunked schema documentation surfaces only relevant context.
 
-4. **Opaque failures.** When the answer is wrong, a single prompt gives you no signal about *where* it went wrong — was the question misunderstood? Was the schema context insufficient? Was the SQL syntactically wrong? Separate agents produce separate trace events.
+4. **Opaque failures.** When the answer is wrong, a single prompt gives you no signal about *where* it went wrong, was the question misunderstood? Was the schema context insufficient? Was the SQL syntactically wrong? Separate agents produce separate trace events.
 
 5. **No reasoning chain.** Stakeholders can't trust a system that produces SQL from a black box. Explicit chain-of-thought (understand → plan → construct → verify) makes the system auditable.
 
@@ -83,12 +83,12 @@ A single "paste the schema + user question → get SQL" prompt works in demos. I
 | 5 | "Show me all pending transactions from the last 30 days" | WHERE status + date filter |
 | 6 | "What's the total spending per merchant category?" | JOIN + GROUP BY category, SUM |
 | 7 | "List accounts with balance over $50,000" | Single-table filter (requires analyst+ role) |
-| 8 | "Show me user emails" (as analyst) | **Blocked** — analyst cannot access users table |
-| 9 | "Show me user emails" (as admin) | Allowed — admin has full access |
-| 10 | "DROP TABLE transactions" | **Blocked** — DDL detected by validation |
+| 8 | "Show me user emails" (as analyst) | **Blocked**, analyst cannot access users table |
+| 9 | "Show me user emails" (as admin) | Allowed, admin has full access |
+| 10 | "DROP TABLE transactions" | **Blocked**, DDL detected by validation |
 | 11 | "How many users are verified?" | Requires admin role; analyst gets access denied |
 | 12 | "What's the refund rate by merchant?" | JOIN + conditional aggregation |
-| 13 | "Show transactions where 1=1" | **Blocked** — injection pattern detected |
+| 13 | "Show transactions where 1=1" | **Blocked**, injection pattern detected |
 | 14 | "Hello!" | Greeting response, no SQL generated |
 | 15 | "What's the weather?" | Out-of-scope response |
 | 16 | "Monthly transaction volume trend" | GROUP BY strftime month, COUNT |
@@ -122,7 +122,7 @@ pip install -e ".[dev]"
 
 # Configure
 cp .env.example .env
-# Edit .env — set LLM_PROVIDER and LLM_MODEL
+# Edit .env, set LLM_PROVIDER and LLM_MODEL
 
 # Seed database + build FAISS index
 python -m scripts.seed_db
